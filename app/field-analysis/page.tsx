@@ -147,6 +147,23 @@ export default function FieldAnalysisPage() {
   const moistureTrend = recentMoisture.length >= 2
     ? recentMoisture[0] - recentMoisture[recentMoisture.length - 1]
     : null;
+  const moistureSeries = data.readings
+    .map((reading) => reading.moisture)
+    .filter((reading): reading is number => reading !== null);
+  const averageMoisture = moistureSeries.length > 0
+    ? moistureSeries.reduce((sum, value) => sum + value, 0) / moistureSeries.length
+    : null;
+  const moistureDeviation = data.soil.moisture !== null && averageMoisture !== null
+    ? data.soil.moisture - averageMoisture
+    : null;
+  const moistureVariance = moistureSeries.length > 1
+    ? moistureSeries.reduce((sum, value) => sum + (value - (averageMoisture ?? value)) ** 2, 0) / moistureSeries.length
+    : null;
+  const nutrientHealth = [data.soil.nitrogen, data.soil.phosphorus, data.soil.potassium]
+    .filter((value): value is number => value !== null);
+  const nutrientBalance = nutrientHealth.length === 3
+    ? nutrientHealth.reduce((sum, value) => sum + value, 0) / nutrientHealth.length
+    : null;
   const twinState = data.soil.moisture === null
     ? "AWAITING SENSOR DATA"
     : data.soil.moisture < 25
@@ -154,6 +171,35 @@ export default function FieldAnalysisPage() {
       : data.soil.moisture > 70
         ? "WET"
         : "STABLE";
+  const moistureRisk = data.soil.moisture === null
+    ? "No current reading"
+    : data.soil.moisture < 25
+      ? "Dry stress likely"
+      : data.soil.moisture > 70
+        ? "Water saturation risk"
+        : "Moisture within range";
+  const twinInsights = [
+    {
+      label: "Historic moisture avg",
+      value: averageMoisture === null ? "—" : `${averageMoisture.toFixed(1)}%`,
+      detail: averageMoisture === null ? "No sample history yet" : "Recent field baseline from the last sensor window",
+    },
+    {
+      label: "Moisture deviation",
+      value: moistureDeviation === null ? "—" : `${moistureDeviation >= 0 ? "+" : ""}${moistureDeviation.toFixed(1)}%`,
+      detail: moistureDeviation === null ? "No comparison available" : moistureDeviation > 5 ? "Current moisture is above the recent average" : moistureDeviation < -5 ? "Current moisture is below the recent average" : "Current moisture is tracking close to the recent norm",
+    },
+    {
+      label: "Variance",
+      value: moistureVariance === null ? "—" : `${moistureVariance.toFixed(1)}%`,
+      detail: moistureVariance === null ? "Not enough readings" : moistureVariance > 25 ? "Field moisture is highly variable" : moistureVariance > 10 ? "Moderate fluctuation across recent samples" : "Stable moisture pattern over time",
+    },
+    {
+      label: "NPK balance",
+      value: nutrientBalance === null ? "—" : `${nutrientBalance.toFixed(0)} avg`,
+      detail: nutrientBalance === null ? "Insufficient nutrient readings" : nutrientBalance > 45 ? "Nutrient profile is strong and well distributed" : nutrientBalance > 30 ? "Balanced but should be monitored" : "Nutrient distribution may need attention",
+    },
+  ];
   const location = browserLocation;
   const mapUrl = location
     ? `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=${location.longitude - 0.01},${location.latitude - 0.01},${location.longitude + 0.01},${location.latitude + 0.01}&bboxSR=4326&imageSR=4326&size=1200,600&format=jpg&f=image`
@@ -349,7 +395,35 @@ export default function FieldAnalysisPage() {
                     <span>{data.soil.moisture === null ? "—" : `${data.soil.moisture.toFixed(1)}%`}</span>
                   </div>
                   <div className="h-2 bg-foreground/10 overflow-hidden">
-                    <div className="h-full bg-foreground transition-all" style={{ width: `${data.soil.moisture ?? 0}%` }} />
+                    <div className="h-full bg-foreground transition-all" style={{ width: `${Math.min(Math.max(data.soil.moisture ?? 0, 0), 100)}%` }} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 grid md:grid-cols-2 xl:grid-cols-4 gap-4">
+                {twinInsights.map((item) => (
+                  <div key={item.label} className="border border-foreground/10 bg-background p-4">
+                    <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground">{item.label}</div>
+                    <div className="mt-3 text-2xl font-display">{item.value}</div>
+                    <div className="mt-2 text-xs leading-relaxed text-muted-foreground">{item.detail}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 border border-foreground/10 bg-background p-4 lg:p-5">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div>
+                    <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground">Twin interpretation</div>
+                    <div className="mt-2 text-xl font-display">{moistureRisk}</div>
+                  </div>
+                  <div className="text-xs font-mono text-muted-foreground max-w-md text-right">
+                    {data.soil.moisture === null
+                      ? "The digital twin is waiting for the latest moisture sample before the field forecast becomes actionable."
+                      : data.soil.moisture < 25
+                        ? "The soil profile is trending dry. The digital twin suggests checking irrigation timing and moisture retention before stress compounds."
+                        : data.soil.moisture > 70
+                          ? "The field is trending wet. The twin flags a likely saturation window and a higher risk of runoff or root stress."
+                          : "Moisture is in the healthy band. The twin indicates a stable moisture window with manageable field risk."}
                   </div>
                 </div>
               </div>

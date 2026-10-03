@@ -70,6 +70,25 @@ export function FocusedAnalysisPage({ kind }: { kind: PageKind }) {
     },
   }[kind];
 
+  const analyticsCards = [
+    ["Samples", `${data.readings.length}`],
+    ["Moisture", value(data.soil.moisture, "%")],
+    ["pH", value(data.soil.ph)],
+    ["Updated", lastUpdated?.toLocaleTimeString("en-GB") ?? "—"],
+  ];
+
+  const sensorCards = [
+    ["Nitrogen", value(data.soil.nitrogen, " mg/kg"), "NPK sensor"],
+    ["Phosphorus", value(data.soil.phosphorus, " mg/kg"), "NPK sensor"],
+    ["Potassium", value(data.soil.potassium, " mg/kg"), "NPK sensor"],
+    ["Moisture", value(data.soil.moisture, "%"), "Soil sensor"],
+    ["Temperature", value(data.environment.temperature, "°C"), "ESP32"],
+    ["Humidity", value(data.environment.humidity, "%"), "ESP32"],
+    ["Pressure", value(data.environment.pressure, " hPa"), "ESP32"],
+    ["Air quality", value(data.environment.airQuality), "ESP32"],
+    ["NPK connection", data.devices.npkSensor, "Device status"],
+  ];
+
   return (
     <main className="min-h-screen bg-background text-foreground">
       <Navigation />
@@ -121,12 +140,9 @@ export function FocusedAnalysisPage({ kind }: { kind: PageKind }) {
           {kind === "analytics" && (
             <>
               <div className="relative z-10 grid grid-cols-2 lg:grid-cols-4 gap-4 mt-20">
-                {[
-                  ["Samples", `${data.readings.length}`],
-                  ["Moisture", value(data.soil.moisture, "%")],
-                  ["pH", value(data.soil.ph)],
-                  ["Updated", lastUpdated?.toLocaleTimeString("en-GB") ?? "—"],
-                ].map(([label, reading]) => <Metric key={label} label={label} value={reading} />)}
+                {analyticsCards.map(([label, reading]) => (
+                  <Metric key={label} label={label} value={reading} />
+                ))}
               </div>
               <div className="relative z-10 grid lg:grid-cols-2 gap-6 mt-6">
                 <TrendChart title="Nutrients" data={chartData} lines={[
@@ -141,22 +157,8 @@ export function FocusedAnalysisPage({ kind }: { kind: PageKind }) {
 
           {kind === "sensors" && (
             <div className="relative z-10 grid md:grid-cols-2 lg:grid-cols-3 gap-4 mt-20">
-              {[
-                ["Nitrogen", value(data.soil.nitrogen, " mg/kg"), "NPK sensor"],
-                ["Phosphorus", value(data.soil.phosphorus, " mg/kg"), "NPK sensor"],
-                ["Potassium", value(data.soil.potassium, " mg/kg"), "NPK sensor"],
-                ["Moisture", value(data.soil.moisture, "%"), "Soil sensor"],
-                ["Temperature", value(data.environment.temperature, "°C"), "ESP32"],
-                ["Humidity", value(data.environment.humidity, "%"), "ESP32"],
-                ["Pressure", value(data.environment.pressure, " hPa"), "ESP32"],
-                ["Air quality", value(data.environment.airQuality), "ESP32"],
-                ["NPK connection", data.devices.npkSensor, "Device status"],
-              ].map(([label, reading, source]) => (
-                <div key={label} className="border border-foreground/10 bg-foreground/[0.02] p-6">
-                  <div className="text-xs font-mono text-muted-foreground uppercase mb-4">{source}</div>
-                  <div className="text-4xl font-display">{reading}</div>
-                  <div className="text-sm text-muted-foreground mt-2">{label}</div>
-                </div>
+              {sensorCards.map(([label, reading, source]) => (
+                <DataTile key={label} label={label} value={reading} source={source} />
               ))}
             </div>
           )}
@@ -195,6 +197,16 @@ export function FocusedAnalysisPage({ kind }: { kind: PageKind }) {
 
 function Metric({ label, value: reading }: { label: string; value: string }) {
   return <div className="border border-foreground/10 bg-foreground/[0.02] p-6"><div className="text-3xl font-display">{reading}</div><div className="text-xs font-mono text-muted-foreground mt-2 uppercase">{label}</div></div>;
+}
+
+function DataTile({ label, value, source }: { label: string; value: string; source: string }) {
+  return (
+    <div className="border border-foreground/10 bg-foreground/[0.02] p-6">
+      <div className="text-xs font-mono text-muted-foreground uppercase mb-4">{source}</div>
+      <div className="text-4xl font-display">{value}</div>
+      <div className="text-sm text-muted-foreground mt-2">{label}</div>
+    </div>
+  );
 }
 
 function TrendChart({ title, data, lines }: { title: string; data: Array<Record<string, number | string | null>>; lines: Array<[string, string]> }) {

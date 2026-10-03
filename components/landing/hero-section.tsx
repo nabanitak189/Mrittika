@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { soilData } from "@/lib/soil-data";
-import { useSoilData } from "@/hooks/use-soil-data";
 
 const words = ["monitor", "measure", "protect", "grow"];
 
@@ -107,7 +105,6 @@ function BlurWord({ word, trigger }: { word: string; trigger: number }) {
 }
 
 export function HeroSection() {
-  const { data } = useSoilData();
   const [isVisible, setIsVisible] = useState(false);
   const [wordIndex, setWordIndex] = useState(0);
 
@@ -200,7 +197,7 @@ export function HeroSection() {
         </div>
       </div>
       
-      {/* Stats — 3 metrics static, no auto-scroll */}
+      {/* Stats — simplified brand-level proof points, not live sensor data */}
       <div 
         className={`absolute bottom-12 left-0 right-0 px-6 lg:px-12 transition-all duration-700 delay-500 ${
           isVisible ? "opacity-100" : "opacity-0"
@@ -208,9 +205,9 @@ export function HeroSection() {
       >
         <div className="max-w-[1400px] mx-auto flex items-start gap-10 lg:gap-20">
           {[
-            { value: data.soil.health === null ? "—" : `${data.soil.health}%`, label: "soil health score" },
-            { value: data.soil.moisture === null ? "—" : `${data.soil.moisture}%`, label: "soil moisture" },
-            { value: data.devices.npkSensor, label: "NPK sensor status" },
+            { value: "24/7", label: "field monitoring" },
+            { value: "3", label: "sensor layers" },
+            { value: "100%", label: "decision visibility" },
           ].map((stat) => (
             <div key={stat.label} className="flex flex-col gap-2">
               <span className="text-3xl lg:text-4xl font-display text-white">{stat.value}</span>

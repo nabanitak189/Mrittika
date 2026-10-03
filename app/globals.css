@@ -4,6 +4,9 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  --font-instrument: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-instrument-serif: Georgia, "Times New Roman", serif;
+  --font-jetbrains: "Consolas", "SFMono-Regular", "Menlo", monospace;
   --background: oklch(0.06 0.008 260);
   --foreground: oklch(0.94 0.005 90);
   --card: oklch(0.09 0.008 260);

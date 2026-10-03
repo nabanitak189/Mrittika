@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
@@ -119,10 +120,10 @@ export function FooterSection() {
           <div className="grid grid-cols-2 md:grid-cols-6 gap-12 lg:gap-8">
             {/* Brand Column */}
             <div className="col-span-2">
-              <a href="#" className="inline-flex items-center gap-2 mb-6">
+              <Link href="/" className="inline-flex items-center gap-2 mb-6">
                 <span className="text-2xl font-display text-white">MRITTIKA</span>
                 <span className="text-xs text-white/40 font-mono">TM</span>
-              </a>
+              </Link>
 
               <p className="text-white/50 leading-relaxed mb-8 max-w-xs text-sm">
                 Soil monitoring for healthier decisions and clearer field data.
@@ -131,14 +132,14 @@ export function FooterSection() {
               {/* Social Links */}
               <div className="flex gap-6">
                 {socialLinks.map((link) => (
-                  <a
+                  <Link
                     key={link.name}
                     href={footerHref(link.href)}
                     className="text-sm text-white/40 hover:text-white transition-colors flex items-center gap-1 group"
                   >
                     {link.name}
                     <ArrowUpRight className="w-3 h-3 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-                  </a>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -150,7 +151,7 @@ export function FooterSection() {
                 <ul className="space-y-4">
                   {links.map((link) => (
                     <li key={link.name}>
-                      <a
+                      <Link
                         href={footerHref(link.href)}
                         className="text-sm text-white/40 hover:text-white transition-colors inline-flex items-center gap-2"
                       >
@@ -160,7 +161,7 @@ export function FooterSection() {
                             {link.badge}
                           </span>
                         )}
-                      </a>
+                      </Link>
                     </li>
                   ))}
                 </ul>
